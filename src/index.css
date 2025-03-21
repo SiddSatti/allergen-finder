@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,6 +99,55 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', sans-serif;
   }
+}
+
+.bytewise-btn {
+  @apply bg-bytewise-blue text-white font-medium py-2 px-6 rounded-md transition-all duration-300 hover:bg-bytewise-lightblue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bytewise-blue;
+}
+
+.bytewise-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-bytewise-blue focus:border-transparent transition-all duration-300;
+}
+
+.bytewise-tag {
+  @apply bg-bytewise-blue text-white font-medium py-2 px-4 rounded-md cursor-pointer transition-all duration-300 hover:bg-bytewise-lightblue;
+}
+
+.bytewise-tag-selected {
+  @apply bg-bytewise-lightblue text-white font-medium py-2 px-4 rounded-md cursor-pointer transition-all duration-300;
+}
+
+.bytewise-tag-input {
+  @apply bg-white border border-gray-300 text-gray-900 font-medium py-2 px-4 rounded-md cursor-pointer transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-bytewise-blue focus:border-transparent;
+}
+
+.bytewise-header {
+  @apply bg-bytewise-blue text-white p-4 flex items-center justify-between;
+}
+
+.bytewise-container {
+  @apply max-w-md mx-auto bg-white min-h-screen animate-fade-in;
+}
+
+.bytewise-page-transition {
+  @apply animate-scale-in;
+}
+
+.bytewise-food-image {
+  @apply w-full h-48 object-cover rounded-md mb-4;
+}
+
+.bytewise-card {
+  @apply bg-white rounded-lg shadow-md p-4 transition-all duration-300 hover:shadow-lg;
+}
+
+.bytewise-modal {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in;
+}
+
+.bytewise-modal-content {
+  @apply bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto animate-scale-in;
 }
