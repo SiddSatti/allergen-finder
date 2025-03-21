@@ -1,8 +1,7 @@
-
 import React, { useState, useRef } from 'react';
 import { Upload, Check, AlertCircle } from 'lucide-react';
 import { CsvData } from '@/types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface CsvUploaderProps {
   onUpload: (data: CsvData[]) => void;

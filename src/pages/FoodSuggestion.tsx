@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import IngredientsModal from '@/components/IngredientsModal';
 import { FoodItem, FoodParameters, DietaryRestriction } from '@/types';
 import { recommendFoods, getTestData } from '@/utils/foodRecommendation';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { X, Clock, MapPin, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 
