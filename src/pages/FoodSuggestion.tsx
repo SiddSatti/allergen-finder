@@ -7,8 +7,10 @@ import SuggestionLoading from '@/components/SuggestionLoading';
 import NoSuggestionsFound from '@/components/NoSuggestionsFound';
 import FoodSuggestionCard from '@/components/FoodSuggestionCard';
 import FeedbackButtons from '@/components/FeedbackButtons';
-import { FoodItem, FoodParameters, DietaryRestriction } from '@/types';
+import { FoodItem, FoodParameters, DietaryRestriction, ModelState } from '@/types';
 import { recommendFoods, getTestData } from '@/utils/foodRecommendation';
+import { getCurrentTimeCategory } from '@/utils/timeUtils';
+import useUserLocation from '@/hooks/useUserLocation';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
@@ -17,6 +19,7 @@ const FoodSuggestion = () => {
   const [currentSuggestion, setCurrentSuggestion] = useState<FoodItem | null>(null);
   const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const userLocation = useUserLocation();
   
   // Generate a new food suggestion based on parameters and current state
   const generateSuggestion = async (choice: number = -1) => {
@@ -35,16 +38,33 @@ const FoodSuggestion = () => {
         .filter((restriction: DietaryRestriction) => restriction.selected)
         .map((restriction: DietaryRestriction) => restriction.name);
       
-      // Create combined parameters
+      // Get current time category
+      const timeCategory = getCurrentTimeCategory();
+      
+      // Get model state from localStorage if available
+      let modelState: ModelState | null = null;
+      const storedModelState = localStorage.getItem('modelState');
+      if (storedModelState) {
+        try {
+          modelState = JSON.parse(storedModelState);
+        } catch (e) {
+          console.error('Error parsing stored model state:', e);
+        }
+      }
+      
+      // Create combined parameters with user location
       const combinedParams: FoodParameters = {
-        budget: 0, // Removed budget as requested
-        distance: params.distance || 0,
-        waitTimeMax: 0, // Removed wait time as requested
-        dietaryRestrictions: selectedRestrictions
+        dietaryRestrictions: selectedRestrictions,
+        longitude: userLocation.longitude || undefined,
+        latitude: userLocation.latitude || undefined,
+        timeCategory
       };
       
+      console.log('Food parameters:', combinedParams);
+      console.log('User location:', userLocation);
+      
       // Get recommendations
-      const recommendations = await recommendFoods(foodItems, combinedParams, choice);
+      const recommendations = await recommendFoods(foodItems, combinedParams, choice, modelState);
       
       if (recommendations.length === 0) {
         toast.error('No food matches your criteria. Try adjusting your preferences.');
@@ -63,8 +83,11 @@ const FoodSuggestion = () => {
   
   useEffect(() => {
     // Generate initial suggestion when component mounts
-    generateSuggestion();
-  }, [navigate]);
+    // or when user location changes
+    if (!userLocation.loading) {
+      generateSuggestion();
+    }
+  }, [userLocation.loading, navigate]);
   
   const handleLike = () => {
     // User likes this food suggestion (choice = 2)
@@ -84,7 +107,8 @@ const FoodSuggestion = () => {
     generateSuggestion(1);
   };
   
-  if (isLoading) {
+  // Show loading state while getting user location
+  if (userLocation.loading || isLoading) {
     return <SuggestionLoading />;
   }
   

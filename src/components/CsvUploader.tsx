@@ -31,12 +31,31 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({ onUpload }) => {
         const text = e.target?.result as string;
         const lines = text.split('\n');
         
-        // First line should be headers
-        const headers = ['Name', 'Location', 'Sub_Location', 'Time', 'Longitude', 'Latitude', 'Allergens', 'Full_Ingredients', 'Embedding', 'Price'];
+        // Expected format: ,Name,Location,Sub_Location,Time,Longitude,Latitude,Allergens,Full_Ingredients,Embedding,Price
+        // The first column might be an index, so we'll ignore it
+        const expectedHeaders = ['Name', 'Location', 'Sub_Location', 'Time', 'Longitude', 'Latitude', 'Allergens', 'Full_Ingredients', 'Embedding', 'Price'];
+        
+        // Verify if the header matches expected format (ignoring first column if it's empty)
+        const headerLine = lines[0];
+        const headerParts = headerLine.split(',');
+        
+        // Check if the file has the correct headers, accounting for the potential first empty column
+        const startIndex = headerParts[0].trim() === '' ? 1 : 0;
+        
+        const headerCheck = expectedHeaders.every((header, index) => {
+          const fileHeader = headerParts[index + startIndex]?.trim();
+          return fileHeader === header;
+        });
+        
+        if (!headerCheck) {
+          toast.error('CSV file format is incorrect. Please use the required format.');
+          return;
+        }
         
         const data: CsvData[] = [];
         
-        for (let i = 0; i < lines.length; i++) {
+        // Start from line 1 (skip header)
+        for (let i = 1; i < lines.length; i++) {
           if (lines[i].trim() === '') continue;
           
           // Split by comma, but respect quotes
@@ -60,12 +79,15 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({ onUpload }) => {
           // Add the last value
           values.push(currentValue.trim());
           
+          // If the first value is an index or empty, skip it
+          const startIndex = values[0].trim() === '' || !isNaN(Number(values[0])) ? 1 : 0;
+          
           // Create row object
           const row: Record<string, string> = {};
           
-          headers.forEach((header, index) => {
-            if (index < values.length) {
-              row[header] = values[index];
+          expectedHeaders.forEach((header, index) => {
+            if (index + startIndex < values.length) {
+              row[header] = values[index + startIndex];
             } else {
               row[header] = '';
             }
@@ -159,7 +181,7 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({ onUpload }) => {
       <div className="mt-4 text-xs text-gray-500 flex items-start space-x-2">
         <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
         <p>
-          CSV format must match: Name, Location, Sub_Location, Time, Longitude, Latitude, Allergens, Full_Ingredients, Embedding, Price
+          CSV format must match: ,Name,Location,Sub_Location,Time,Longitude,Latitude,Allergens,Full_Ingredients,Embedding,Price
         </p>
       </div>
     </div>

@@ -19,12 +19,16 @@ export interface FoodItem {
   embedding?: number[]; // Embedding vector for ML model
   longitude?: number;   // Longitude for location
   latitude?: number;    // Latitude for location
+  timeCategory?: string; // Breakfast, Lunch, or Dinner
+  skipped?: boolean;    // Flag to indicate if item was skipped
+  disliked?: boolean;   // Flag to indicate if item was disliked
 }
 
 export interface FoodParameters {
   dietaryRestrictions: string[];
   longitude?: number;  // User's longitude
   latitude?: number;   // User's latitude
+  timeCategory?: string; // Current time category (breakfast, lunch, dinner)
 }
 
 export interface CsvData {
@@ -48,6 +52,8 @@ export interface ModelState {
   model: any;      // Store the recommendation model instance
   iteration: number;
   userPreferences: number[];
+  skippedItems: string[]; // IDs of skipped items
+  dislikedItems: string[]; // IDs of disliked items
 }
 
 export interface UserProfile {

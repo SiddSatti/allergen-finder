@@ -3,17 +3,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import ParameterInput from '@/components/ParameterInput';
+import { MapPin, Clock } from 'lucide-react';
+import useUserLocation from '@/hooks/useUserLocation';
 import { motion } from 'framer-motion';
 
 const FoodParameters = () => {
   const navigate = useNavigate();
   const [distance, setDistance] = useState('');
+  const userLocation = useUserLocation();
   
   const handleGenerateResults = () => {
     const params = {
-      budget: 0, // Setting to 0 as requested to remove from UI
       distance: parseFloat(distance) || 0,
-      waitTimeMax: 0, // Setting to 0 as requested to remove from UI
     };
     
     localStorage.setItem('foodParameters', JSON.stringify(params));
@@ -48,7 +49,31 @@ const FoodParameters = () => {
             step={0.1}
           />
           
-          <div className="flex justify-center mt-8">
+          <div className="mt-6 mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-medium mb-3">Your Preferences</h3>
+            
+            <div className="flex items-center mb-2">
+              <Clock className="h-4 w-4 mr-2 text-gray-600" />
+              <p className="text-sm text-gray-700">
+                We're showing food available for the current time of day.
+              </p>
+            </div>
+            
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 mr-2 text-gray-600" />
+              <p className="text-sm text-gray-700">
+                {userLocation.loading ? (
+                  "Detecting your location..."
+                ) : userLocation.error ? (
+                  "Location unavailable. Some recommendations may not be accurate."
+                ) : (
+                  "Using your current location for distance calculations."
+                )}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
