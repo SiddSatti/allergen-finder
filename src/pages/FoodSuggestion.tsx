@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -7,7 +8,7 @@ import NoSuggestionsFound from '@/components/NoSuggestionsFound';
 import FoodSuggestionCard from '@/components/FoodSuggestionCard';
 import FeedbackButtons from '@/components/FeedbackButtons';
 import { FoodItem, FoodParameters, DietaryRestriction, ModelState } from '@/types';
-import { recommendFoods } from '@/utils/foodRecommendation';
+import { recommendFoods, getTestData } from '@/utils/foodRecommendation';
 import { getCurrentTimeCategory } from '@/utils/timeUtils';
 import useUserLocation from '@/hooks/useUserLocation';
 import { toast } from 'sonner';
@@ -25,17 +26,8 @@ const FoodSuggestion = () => {
     setIsLoading(true);
     
     try {
-      // Get food items from local storage
-      const storedFoodItems = localStorage.getItem('foodItems');
-      let foodItems: FoodItem[] = [];
-      
-      if (storedFoodItems) {
-        foodItems = JSON.parse(storedFoodItems);
-      } else {
-        toast.error('No food data found. Please go back and paste CSV data.');
-        navigate('/food-parameters');
-        return;
-      }
+      // Use test data since we're removing the CSV uploader
+      const foodItems = getTestData();
       
       // Get parameters from local storage
       const params = JSON.parse(localStorage.getItem('foodParameters') || '{}');

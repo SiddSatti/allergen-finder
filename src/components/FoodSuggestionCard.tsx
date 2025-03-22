@@ -15,22 +15,9 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
   return (
     <div className="bytewise-card mb-4">
       <div className="relative bg-gray-200 h-48 rounded-md mb-4 flex items-center justify-center">
-        {food.image ? (
-          <img 
-            src={food.image} 
-            alt={food.name} 
-            className="w-full h-full object-cover rounded-md" 
-          />
-        ) : (
-          <div className="text-center p-4">
-            <h3 className="text-xl font-bold">{food.name}</h3>
-            <p className="mt-2 text-gray-600">{food.location}</p>
-          </div>
-        )}
-        
         <button 
           onClick={onViewIngredients}
-          className="bytewise-btn absolute bottom-4 right-4 flex items-center"
+          className="bytewise-btn flex items-center"
         >
           <Info className="h-5 w-5 mr-2" />
           View Full Ingredients
@@ -68,7 +55,7 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
         <p className="text-sm text-gray-600">{food.waitTime} minutes wait time</p>
       </div>
       
-      {food.restrictions && food.restrictions.length > 0 && (
+      {food.restrictions.length > 0 && (
         <div className="mt-4">
           <p className="text-sm font-medium text-gray-700 mb-2">Contains:</p>
           <div className="flex flex-wrap gap-2">
