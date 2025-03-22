@@ -2,8 +2,8 @@ import { FoodItem, FoodParameters } from '@/types';
 
 // This is a TypeScript adaptation of the Python r_model class
 export class RecommendationModel {
-  private iteration: number;
-  private ideal: number[];
+  public iteration: number;
+  public ideal: number[];
   private allergies: string[];
   private food: FoodItem[];
   private longitude: number;

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FoodItem } from '@/types';
 import { Clock, MapPin, Info } from 'lucide-react';
 
@@ -13,12 +12,6 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
   food, 
   onViewIngredients 
 }) => {
-  const navigate = useNavigate();
-
-  const handleViewDetails = (id: string) => {
-    navigate(`/food-details/${id}`);
-  };
-
   return (
     <div className="bytewise-card mb-4">
       <div className="relative bg-gray-200 h-48 rounded-md mb-4 flex items-center justify-center">
@@ -75,15 +68,6 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
           </div>
         </div>
       )}
-      
-      <div className="mt-4">
-        <button
-          onClick={() => handleViewDetails(food.id)}
-          className="bytewise-btn w-full"
-        >
-          View Details
-        </button>
-      </div>
     </div>
   );
 };

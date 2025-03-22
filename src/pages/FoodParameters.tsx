@@ -7,15 +7,13 @@ import { motion } from 'framer-motion';
 
 const FoodParameters = () => {
   const navigate = useNavigate();
-  const [budget, setBudget] = useState('');
   const [distance, setDistance] = useState('');
-  const [waitTime, setWaitTime] = useState('');
   
   const handleGenerateResults = () => {
     const params = {
-      budget: parseFloat(budget) || 0,
+      budget: 0, // Setting to 0 as requested to remove from UI
       distance: parseFloat(distance) || 0,
-      waitTimeMax: parseFloat(waitTime) || 0,
+      waitTimeMax: 0, // Setting to 0 as requested to remove from UI
     };
     
     localStorage.setItem('foodParameters', JSON.stringify(params));
@@ -37,18 +35,8 @@ const FoodParameters = () => {
         >
           <h2 className="text-2xl font-semibold mb-4">Set Your Preferences</h2>
           <p className="text-gray-600 mb-6">
-            Enter your preferences for budget, distance, and wait time. Leave blank for no preference.
+            Enter your preference for maximum distance. Leave blank for no preference.
           </p>
-          
-          <ParameterInput
-            label="Budget"
-            value={budget}
-            onChange={setBudget}
-            placeholder="Enter maximum price ($)"
-            type="number"
-            min={0}
-            step={0.01}
-          />
           
           <ParameterInput
             label="Distance"
@@ -58,16 +46,6 @@ const FoodParameters = () => {
             type="number"
             min={0}
             step={0.1}
-          />
-          
-          <ParameterInput
-            label="Wait Time Max"
-            value={waitTime}
-            onChange={setWaitTime}
-            placeholder="Enter maximum wait time (minutes)"
-            type="number"
-            min={0}
-            step={1}
           />
           
           <div className="flex justify-center mt-8">

@@ -20,13 +20,8 @@ const FoodDetails = () => {
       setIsLoading(true);
       
       try {
-        // Get food items from local storage
-        let foodItems = JSON.parse(localStorage.getItem('foodItems') || '[]');
-        
-        // If no food items are uploaded, use test data
-        if (foodItems.length === 0) {
-          foodItems = getTestData();
-        }
+        // Use test data as we removed CSV upload functionality
+        const foodItems = getTestData();
         
         // Find the food item with the matching ID
         const foodItem = foodItems.find((item: FoodItem) => item.id === id);
@@ -45,10 +40,6 @@ const FoodDetails = () => {
     
     loadFoodDetails();
   }, [id]);
-  
-  const handleOrder = () => {
-    alert('Order functionality would be implemented here.');
-  };
   
   if (isLoading) {
     return (
@@ -154,17 +145,6 @@ const FoodDetails = () => {
               </div>
             </div>
           )}
-        </div>
-        
-        <div className="flex justify-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleOrder}
-            className="bytewise-btn w-full"
-          >
-            Order
-          </motion.button>
         </div>
       </motion.div>
       

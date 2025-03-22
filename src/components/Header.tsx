@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, User } from 'lucide-react';
+import { ChevronLeft, LogIn } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   title: string;
@@ -25,6 +26,10 @@ const Header: React.FC<HeaderProps> = ({
     } else {
       navigate(-1);
     }
+  };
+
+  const handleLoginClick = () => {
+    toast.info("Login functionality will be implemented soon");
   };
 
   return (
@@ -51,9 +56,13 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
       {showProfileButton && (
-        <div className="rounded-full border-2 border-white p-1">
-          <User className="h-6 w-6" />
-        </div>
+        <button 
+          className="rounded-full border-2 border-white p-1 hover:bg-bytewise-lightblue transition-colors"
+          onClick={handleLoginClick}
+          aria-label="Login"
+        >
+          <LogIn className="h-6 w-6" />
+        </button>
       )}
     </header>
   );

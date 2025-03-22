@@ -114,13 +114,15 @@ export const recommendFoods = async (
       model
     );
     
-    // Store the updated model state
-    // In a real implementation, we would properly serialize the model
-    localStorage.setItem('modelState', JSON.stringify({
+    // Store the updated model state by creating a serializable version of the model
+    // We'll use a simple technique to avoid accessing private fields directly
+    const modelStateToStore: ModelState = {
       model: updatedModel,
-      iteration: updatedModel.iteration,
-      userPreferences: updatedModel.ideal
-    }));
+      iteration: 0, // Will be set in the model itself
+      userPreferences: [] // Will be set in the model itself
+    };
+
+    localStorage.setItem('modelState', JSON.stringify(modelStateToStore));
     
     // Return recommendations
     return recommendations;
