@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Upload, Check, AlertCircle } from 'lucide-react';
 import { CsvData } from '@/types';
@@ -29,26 +30,45 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({ onUpload }) => {
       try {
         const text = e.target?.result as string;
         const lines = text.split('\n');
-        const headers = lines[0].split(',').map(header => header.trim());
         
-        const requiredHeaders = ['id', 'name', 'price', 'distance', 'waitTime', 'ingredients', 'location', 'restrictions'];
-        const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
-        
-        if (missingHeaders.length > 0) {
-          toast.error(`CSV is missing required headers: ${missingHeaders.join(', ')}`);
-          return;
-        }
+        // First line should be headers
+        const headers = ['Name', 'Location', 'Sub_Location', 'Time', 'Longitude', 'Latitude', 'Allergens', 'Full_Ingredients', 'Embedding', 'Price'];
         
         const data: CsvData[] = [];
         
-        for (let i = 1; i < lines.length; i++) {
+        for (let i = 0; i < lines.length; i++) {
           if (lines[i].trim() === '') continue;
           
-          const values = lines[i].split(',').map(value => value.trim());
+          // Split by comma, but respect quotes
+          let values: string[] = [];
+          let currentValue = '';
+          let inQuotes = false;
+          
+          for (let j = 0; j < lines[i].length; j++) {
+            const char = lines[i][j];
+            
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(currentValue.trim());
+              currentValue = '';
+            } else {
+              currentValue += char;
+            }
+          }
+          
+          // Add the last value
+          values.push(currentValue.trim());
+          
+          // Create row object
           const row: Record<string, string> = {};
           
           headers.forEach((header, index) => {
-            row[header] = values[index] || '';
+            if (index < values.length) {
+              row[header] = values[index];
+            } else {
+              row[header] = '';
+            }
           });
           
           data.push(row as unknown as CsvData);
@@ -59,6 +79,7 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({ onUpload }) => {
         onUpload(data);
         toast.success('CSV file successfully uploaded');
       } catch (error) {
+        console.error('Error parsing CSV:', error);
         toast.error('Failed to parse CSV file. Please check the format.');
       }
     };
@@ -138,8 +159,7 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({ onUpload }) => {
       <div className="mt-4 text-xs text-gray-500 flex items-start space-x-2">
         <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
         <p>
-          CSV file must include: id, name, price, distance, waitTime, ingredients (comma separated within quotes), 
-          location, and restrictions (comma separated within quotes).
+          CSV format must match: Name, Location, Sub_Location, Time, Longitude, Latitude, Allergens, Full_Ingredients, Embedding, Price
         </p>
       </div>
     </div>

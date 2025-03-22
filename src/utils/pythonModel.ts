@@ -1,3 +1,4 @@
+
 import { FoodItem, FoodParameters } from '@/types';
 
 // This is a TypeScript adaptation of the Python r_model class
@@ -35,6 +36,9 @@ export class RecommendationModel {
         this.allergies.includes(restriction)
       );
     });
+    
+    // Initialize scores immediately after loading food
+    this.getScores();
   }
 
   // Set user's location
@@ -56,6 +60,7 @@ export class RecommendationModel {
       normB += b[i] * b[i];
     }
     
+    if (normA === 0 || normB === 0) return 0;
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
@@ -109,8 +114,14 @@ export class RecommendationModel {
 
   // Get the food item with the highest score
   getMax(): FoodItem {
-    if (this.scoreData.length === 0) {
-      throw new Error("No scores calculated yet. Call getScores() first.");
+    if (!this.scoreData || this.scoreData.length === 0) {
+      // If scores haven't been calculated yet, do it now
+      this.getScores();
+      
+      // If we still have no scores, throw an error
+      if (this.scoreData.length === 0) {
+        throw new Error("No food items available for recommendation");
+      }
     }
     
     // Find the item with the highest score
@@ -133,44 +144,63 @@ export class RecommendationModel {
 
   // Process user's choice and update the model
   iterate(choice: number): void {
-    // Get the current max food item
-    const maxFood = this.getMax();
-    
-    // Use the embedding from the food item, or create a fallback
-    const embedding = maxFood.embedding || Array(100).fill(0).map(() => Math.random());
-    
-    if (choice === 0) {
-      // User clicked X (dislike)
-      // Update ideal vector to be less like this food
-      this.ideal = this.ideal.map((val, idx) => val - (embedding[idx % embedding.length] / 10));
-    } 
-    else if (choice === 1) {
-      // User clicked shuffle
-      // Just increment iteration
-    } 
-    else if (choice === 2) {
-      // User liked the food
-      // Update ideal vector to be more like this food
-      this.ideal = this.ideal.map((val, idx) => val + (embedding[idx % embedding.length] / 10));
+    try {
+      // Get the current max food item
+      const maxFood = this.getMax();
+      
+      // Use the embedding from the food item, or create a fallback
+      const embedding = maxFood.embedding || Array(100).fill(0).map(() => Math.random());
+      
+      if (choice === 0) {
+        // User clicked X (dislike)
+        // Update ideal vector to be less like this food
+        this.ideal = this.ideal.map((val, idx) => {
+          if (idx < embedding.length) {
+            return val - (embedding[idx] / 10);
+          }
+          return val;
+        });
+      } 
+      else if (choice === 1) {
+        // User clicked shuffle
+        // Just increment iteration
+      } 
+      else if (choice === 2) {
+        // User liked the food
+        // Update ideal vector to be more like this food
+        this.ideal = this.ideal.map((val, idx) => {
+          if (idx < embedding.length) {
+            return val + (embedding[idx] / 10);
+          }
+          return val;
+        });
+      }
+      
+      // Increment iteration counter
+      this.iteration += 1;
+      
+      // Every 10 iterations, normalize the ideal vector
+      if ((this.iteration % 10) === 0) {
+        const mean = this.ideal.reduce((sum, val) => sum + val, 0) / this.ideal.length;
+        this.ideal = this.ideal.map(val => val - mean);
+      }
+      
+      // Recalculate scores after updating the model
+      this.getScores();
+    } catch (error) {
+      console.error("Error in model iteration:", error);
     }
-    
-    // Increment iteration counter
-    this.iteration += 1;
-    
-    // Every 10 iterations, normalize the ideal vector
-    if ((this.iteration % 10) === 0) {
-      const mean = this.ideal.reduce((sum, val) => sum + val, 0) / this.ideal.length;
-      this.ideal = this.ideal.map(val => val - mean);
-    }
-    
-    // Recalculate scores after updating the model
-    this.getScores();
   }
 
   // Get top N recommendations
   getTopRecommendations(n: number = 10): FoodItem[] {
     if (this.scoreData.length === 0) {
       this.getScores();
+    }
+    
+    // If still no scores, return empty array
+    if (this.scoreData.length === 0) {
+      return [];
     }
     
     // Sort items by score (descending)
@@ -204,14 +234,20 @@ export const getRecommendations = (
   
   // If this is a new iteration with a choice, process it
   if (previousModel && userChoice >= 0) {
-    model.iterate(userChoice);
-  } else {
-    // Otherwise just calculate scores
-    model.getScores();
+    try {
+      model.iterate(userChoice);
+    } catch (error) {
+      console.error("Error during model iteration:", error);
+    }
   }
   
   // Get top recommendations
-  const recommendations = model.getTopRecommendations(10);
+  let recommendations: FoodItem[] = [];
+  try {
+    recommendations = model.getTopRecommendations(10);
+  } catch (error) {
+    console.error("Error getting recommendations:", error);
+  }
   
   return { model, recommendations };
 };

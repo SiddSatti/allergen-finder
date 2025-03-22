@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -15,9 +14,35 @@ const DietaryRestrictions = () => {
   const [newRestriction, setNewRestriction] = useState('');
   
   useEffect(() => {
+    // First check if user is logged in
+    const userProfileStr = localStorage.getItem('userProfile');
+    if (userProfileStr) {
+      const userProfile = JSON.parse(userProfileStr);
+      
+      // If user has dietary restrictions saved, use those
+      if (userProfile.dietaryRestrictions && userProfile.dietaryRestrictions.length > 0) {
+        setRestrictions(userProfile.dietaryRestrictions);
+        return;
+      }
+    }
+    
+    // Otherwise check for saved restrictions or use defaults
     const savedRestrictions = localStorage.getItem('dietaryRestrictions');
     if (savedRestrictions) {
       setRestrictions(JSON.parse(savedRestrictions));
+    } else {
+      // Default restrictions if nothing is saved
+      const defaultRestrictions = [
+        { id: '1', name: 'Dairy', selected: false },
+        { id: '2', name: 'Gluten', selected: false },
+        { id: '3', name: 'Nuts', selected: false },
+        { id: '4', name: 'Soy', selected: false },
+        { id: '5', name: 'Fish', selected: false },
+        { id: '6', name: 'Shellfish', selected: false },
+        { id: '7', name: 'Egg', selected: false },
+        { id: '8', name: 'Peanuts', selected: false }
+      ];
+      setRestrictions(defaultRestrictions);
     }
   }, []);
   
@@ -27,8 +52,17 @@ const DietaryRestrictions = () => {
         ? { ...restriction, selected: !restriction.selected } 
         : restriction
     );
+    
     setRestrictions(updatedRestrictions);
     localStorage.setItem('dietaryRestrictions', JSON.stringify(updatedRestrictions));
+    
+    // If user is logged in, update their profile
+    const userProfileStr = localStorage.getItem('userProfile');
+    if (userProfileStr) {
+      const userProfile = JSON.parse(userProfileStr);
+      userProfile.dietaryRestrictions = updatedRestrictions;
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    }
   };
   
   const handleAddRestriction = () => {
@@ -42,6 +76,15 @@ const DietaryRestrictions = () => {
     
     setRestrictions(updatedRestrictions);
     localStorage.setItem('dietaryRestrictions', JSON.stringify(updatedRestrictions));
+    
+    // If user is logged in, update their profile
+    const userProfileStr = localStorage.getItem('userProfile');
+    if (userProfileStr) {
+      const userProfile = JSON.parse(userProfileStr);
+      userProfile.dietaryRestrictions = updatedRestrictions;
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    }
+    
     setNewRestriction('');
   };
   

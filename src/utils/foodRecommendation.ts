@@ -8,10 +8,41 @@ export const processCSVData = (csvData: CsvData[]): FoodItem[] => {
     let embedding: number[] | undefined;
     if (item.Embedding) {
       try {
-        embedding = item.Embedding.split(',').map(num => parseFloat(num.trim()));
+        // Clean the embedding string (remove brackets, extra spaces)
+        const embeddingStr = item.Embedding.replace(/^\[|\]$/g, '').trim();
+        embedding = embeddingStr.split(/\s+/).map(num => parseFloat(num.trim()));
       } catch (e) {
         console.error('Error parsing embedding:', e);
       }
+    }
+    
+    // Parse allergens/restrictions
+    let restrictions: string[] = [];
+    try {
+      if (item.Allergens) {
+        // Handle different formats: ["Dairy", "Gluten"] or Dairy, Gluten
+        if (item.Allergens.startsWith('[')) {
+          restrictions = JSON.parse(item.Allergens.replace(/'/g, '"'));
+        } else {
+          restrictions = item.Allergens.split(',').map(r => r.trim());
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing restrictions:', e);
+    }
+    
+    // Parse ingredients
+    let ingredients: string[] = [];
+    try {
+      if (item.Full_Ingredients) {
+        if (item.Full_Ingredients.includes(',')) {
+          ingredients = item.Full_Ingredients.split(',').map(i => i.trim());
+        } else {
+          ingredients = [item.Full_Ingredients];
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing ingredients:', e);
     }
     
     return {
@@ -19,11 +50,11 @@ export const processCSVData = (csvData: CsvData[]): FoodItem[] => {
       name: item.Name,
       price: parseFloat(item.Price || '0'),
       distance: 0, // This will be calculated based on coordinates
-      waitTime: parseInt(item.Time || '0'),
-      ingredients: item.Full_Ingredients.split(',').map(i => i.trim()),
+      waitTime: parseInt(item.Time.match(/\d+/)?.[0] || '0'), // Extract number from time string
+      ingredients: ingredients,
       location: item.Location,
       subLocation: item.Sub_Location,
-      restrictions: item.Allergens.split(',').map(r => r.trim()),
+      restrictions: restrictions,
       embedding: embedding,
       longitude: item.Longitude ? parseFloat(item.Longitude) : undefined,
       latitude: item.Latitude ? parseFloat(item.Latitude) : undefined
@@ -44,21 +75,9 @@ export const recommendFoodsSimple = (foodItems: FoodItem[], parameters: FoodPara
     );
   });
   
-  // Filter by budget, distance, and wait time
-  const filteredByParameters = filteredByRestrictions.filter(food => {
-    return (
-      (parameters.budget === 0 || food.price <= parameters.budget) &&
-      (parameters.distance === 0 || food.distance <= parameters.distance) &&
-      (parameters.waitTimeMax === 0 || food.waitTime <= parameters.waitTimeMax)
-    );
-  });
-  
-  // Sort by a combination of factors
-  // Lower price, shorter distance, and shorter wait time are better
-  const sortedFoods = filteredByParameters.sort((a, b) => {
-    const aScore = (a.price * 0.4) + (a.distance * 0.3) + (a.waitTime * 0.3);
-    const bScore = (b.price * 0.4) + (b.distance * 0.3) + (b.waitTime * 0.3);
-    return aScore - bScore;
+  // Sort by distance if available
+  const sortedFoods = filteredByRestrictions.sort((a, b) => {
+    return a.distance - b.distance;
   });
   
   return sortedFoods;
@@ -83,13 +102,8 @@ export const recommendFoods = async (
       }
     }
     
-    // Apply basic filters first (distance)
-    const filteredItems = foodItems.filter(food => {
-      return parameters.distance === 0 || food.distance <= parameters.distance;
-    });
-    
-    // If we have no items after basic filtering, return empty array
-    if (filteredItems.length === 0) {
+    // If we have no items, return empty array
+    if (foodItems.length === 0) {
       return [];
     }
     
@@ -102,7 +116,7 @@ export const recommendFoods = async (
     
     // Get recommendations using the model
     const { model: updatedModel, recommendations } = getRecommendations(
-      filteredItems,
+      foodItems,
       parameters,
       userChoice,
       model
@@ -111,8 +125,8 @@ export const recommendFoods = async (
     // Store the updated model state
     const modelStateToStore: ModelState = {
       model: updatedModel,
-      iteration: 0,
-      userPreferences: []
+      iteration: updatedModel.iteration,
+      userPreferences: updatedModel.ideal
     };
 
     localStorage.setItem('modelState', JSON.stringify(modelStateToStore));

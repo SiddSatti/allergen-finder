@@ -22,9 +22,6 @@ export interface FoodItem {
 }
 
 export interface FoodParameters {
-  budget: number;
-  distance: number;
-  waitTimeMax: number;
   dietaryRestrictions: string[];
   longitude?: number;  // User's longitude
   latitude?: number;   // User's latitude
@@ -51,4 +48,12 @@ export interface ModelState {
   model: any;      // Store the recommendation model instance
   iteration: number;
   userPreferences: number[];
+}
+
+export interface UserProfile {
+  id: string;
+  email?: string;
+  displayName?: string;
+  dietaryRestrictions: DietaryRestriction[];
+  modelState?: ModelState;
 }
