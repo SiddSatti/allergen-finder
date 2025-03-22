@@ -46,8 +46,6 @@ export class RecommendationModel {
   // Calculate similarity between two vectors (cosine similarity)
   private cosineSimilarity(a: number[], b: number[]): number {
     // Implementation of cosine similarity
-    // In a real app, we'd implement this properly or use a library
-    // This is a simplified version for demonstration
     let dotProduct = 0;
     let normA = 0;
     let normB = 0;
@@ -64,8 +62,6 @@ export class RecommendationModel {
   // Calculate distance between two coordinates (Haversine formula)
   private haversineDistance(lon1: number, lat1: number, lon2: number, lat2: number): number {
     // Implementation of the haversine formula
-    // In a real app, we'd implement this properly or use a library
-    // This is a simplified version for demonstration
     const R = 6371; // Radius of the Earth in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -86,17 +82,20 @@ export class RecommendationModel {
     this.scoreData = [];
     
     for (const item of this.food) {
-      // For demonstration purposes, we'll create a random embedding
-      // In a real app, this would come from the database
-      const fakeEmbedding = Array(100).fill(0).map(() => Math.random());
+      // Use the embedding from the food item if available, otherwise create a fallback
+      const embedding = item.embedding || Array(100).fill(0).map(() => Math.random());
       
       // Calculate cosine similarity score
-      const cosScore = this.cosineSimilarity(this.ideal, fakeEmbedding);
+      const cosScore = this.cosineSimilarity(this.ideal, embedding);
       
-      // Calculate distance score
-      // For demonstration, we'll just use the distance field directly
-      // In a real app, this would use the haversine formula with coordinates
-      const distScore = item.distance;
+      // Calculate distance score using coordinates if available
+      let distScore = 0;
+      if (item.longitude && item.latitude && this.longitude && this.latitude) {
+        distScore = this.haversineDistance(this.longitude, this.latitude, item.longitude, item.latitude);
+      } else {
+        // Fallback to the distance field
+        distScore = item.distance;
+      }
       
       // Final score calculation (similar to the Python model)
       const score = (cosScore * 5) - distScore;
@@ -137,14 +136,13 @@ export class RecommendationModel {
     // Get the current max food item
     const maxFood = this.getMax();
     
-    // For demonstration, create a fake embedding
-    // In a real app, this would come from the database
-    const fakeEmbedding = Array(100).fill(0).map(() => Math.random());
+    // Use the embedding from the food item, or create a fallback
+    const embedding = maxFood.embedding || Array(100).fill(0).map(() => Math.random());
     
     if (choice === 0) {
       // User clicked X (dislike)
       // Update ideal vector to be less like this food
-      this.ideal = this.ideal.map((val, idx) => val - (fakeEmbedding[idx % fakeEmbedding.length] / 10));
+      this.ideal = this.ideal.map((val, idx) => val - (embedding[idx % embedding.length] / 10));
     } 
     else if (choice === 1) {
       // User clicked shuffle
@@ -153,7 +151,7 @@ export class RecommendationModel {
     else if (choice === 2) {
       // User liked the food
       // Update ideal vector to be more like this food
-      this.ideal = this.ideal.map((val, idx) => val + (fakeEmbedding[idx % fakeEmbedding.length] / 10));
+      this.ideal = this.ideal.map((val, idx) => val + (embedding[idx % embedding.length] / 10));
     }
     
     // Increment iteration counter

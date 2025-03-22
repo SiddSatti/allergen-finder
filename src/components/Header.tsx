@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, LogIn } from 'lucide-react';
+import { ChevronLeft, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface HeaderProps {
@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({
           onClick={handleLoginClick}
           aria-label="Login"
         >
-          <LogIn className="h-6 w-6" />
+          <User className="h-6 w-6" />
         </button>
       )}
     </header>

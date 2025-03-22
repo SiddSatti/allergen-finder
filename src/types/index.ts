@@ -13,11 +13,12 @@ export interface FoodItem {
   waitTime: number;
   ingredients: string[];
   location: string;
+  subLocation?: string;
   image?: string;
   restrictions: string[];
-  embedding?: number[]; // Optional embedding vector for ML model
-  longitude?: number;   // Optional longitude for location
-  latitude?: number;    // Optional latitude for location
+  embedding?: number[]; // Embedding vector for ML model
+  longitude?: number;   // Longitude for location
+  latitude?: number;    // Latitude for location
 }
 
 export interface FoodParameters {
@@ -30,17 +31,16 @@ export interface FoodParameters {
 }
 
 export interface CsvData {
-  id: string;
-  name: string;
-  price: string;
-  distance: string;
-  waitTime: string;
-  ingredients: string;
-  location: string;
-  restrictions: string;
-  embedding?: string;    // Optional embedding string (to be parsed)
-  longitude?: string;    // Optional longitude string
-  latitude?: string;     // Optional latitude string
+  Name: string;
+  Location: string;
+  Sub_Location: string;
+  Time: string;
+  Longitude: string;
+  Latitude: string;
+  Allergens: string;
+  Full_Ingredients: string;
+  Embedding: string;
+  Price: string;
 }
 
 export interface ModelChoice {

@@ -1,32 +1,32 @@
-
 import { FoodItem, FoodParameters, CsvData, ModelState } from '@/types';
 import { RecommendationModel, getRecommendations } from './pythonModel';
 
 // Process CSV data into FoodItem objects
 export const processCSVData = (csvData: CsvData[]): FoodItem[] => {
-  return csvData.map(item => {
+  return csvData.map((item, index) => {
     // Parse embedding if available
     let embedding: number[] | undefined;
-    if (item.embedding) {
+    if (item.Embedding) {
       try {
-        embedding = item.embedding.split(',').map(num => parseFloat(num.trim()));
+        embedding = item.Embedding.split(',').map(num => parseFloat(num.trim()));
       } catch (e) {
         console.error('Error parsing embedding:', e);
       }
     }
     
     return {
-      id: item.id,
-      name: item.name,
-      price: parseFloat(item.price),
-      distance: parseFloat(item.distance),
-      waitTime: parseFloat(item.waitTime),
-      ingredients: item.ingredients.split(',').map(i => i.trim()),
-      location: item.location,
-      restrictions: item.restrictions.split(',').map(r => r.trim()),
+      id: index.toString(), // Generate an ID since it's not in the CSV
+      name: item.Name,
+      price: parseFloat(item.Price || '0'),
+      distance: 0, // This will be calculated based on coordinates
+      waitTime: parseInt(item.Time || '0'),
+      ingredients: item.Full_Ingredients.split(',').map(i => i.trim()),
+      location: item.Location,
+      subLocation: item.Sub_Location,
+      restrictions: item.Allergens.split(',').map(r => r.trim()),
       embedding: embedding,
-      longitude: item.longitude ? parseFloat(item.longitude) : undefined,
-      latitude: item.latitude ? parseFloat(item.latitude) : undefined
+      longitude: item.Longitude ? parseFloat(item.Longitude) : undefined,
+      latitude: item.Latitude ? parseFloat(item.Latitude) : undefined
     };
   });
 };
@@ -83,13 +83,9 @@ export const recommendFoods = async (
       }
     }
     
-    // Apply basic filters first (budget, distance, waitTime)
+    // Apply basic filters first (distance)
     const filteredItems = foodItems.filter(food => {
-      return (
-        (parameters.budget === 0 || food.price <= parameters.budget) &&
-        (parameters.distance === 0 || food.distance <= parameters.distance) &&
-        (parameters.waitTimeMax === 0 || food.waitTime <= parameters.waitTimeMax)
-      );
+      return parameters.distance === 0 || food.distance <= parameters.distance;
     });
     
     // If we have no items after basic filtering, return empty array
@@ -101,8 +97,6 @@ export const recommendFoods = async (
     let model: RecommendationModel | null = null;
     if (modelState) {
       // In a real implementation, we would restore the model from the state
-      // Since we can't directly serialize/deserialize class instances easily,
-      // we'll just create a new model and pretend it's restored
       model = new RecommendationModel(parameters.dietaryRestrictions);
     }
     
@@ -114,12 +108,11 @@ export const recommendFoods = async (
       model
     );
     
-    // Store the updated model state by creating a serializable version of the model
-    // We'll use a simple technique to avoid accessing private fields directly
+    // Store the updated model state
     const modelStateToStore: ModelState = {
       model: updatedModel,
-      iteration: 0, // Will be set in the model itself
-      userPreferences: [] // Will be set in the model itself
+      iteration: 0,
+      userPreferences: []
     };
 
     localStorage.setItem('modelState', JSON.stringify(modelStateToStore));

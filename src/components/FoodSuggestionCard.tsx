@@ -20,7 +20,7 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
           className="bytewise-btn flex items-center"
         >
           <Info className="h-5 w-5 mr-2" />
-          View Ingredients
+          View Full Ingredients
         </button>
       </div>
       
@@ -28,8 +28,8 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
       
       <div className="flex justify-between mb-4">
         <div className="text-left">
-          <p className="text-sm font-medium text-gray-700">Price:</p>
-          <p className="font-bold">${food.price.toFixed(2)}</p>
+          <p className="text-sm font-medium text-gray-700">Location:</p>
+          <p className="font-bold">{food.location}</p>
         </div>
         
         <div className="text-center">
@@ -43,10 +43,12 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
         </div>
       </div>
       
-      <div className="flex items-center mb-3">
-        <MapPin className="h-4 w-4 mr-2 text-gray-600" />
-        <p className="text-sm text-gray-600">{food.location}</p>
-      </div>
+      {food.subLocation && (
+        <div className="flex items-center mb-3">
+          <MapPin className="h-4 w-4 mr-2 text-gray-600" />
+          <p className="text-sm text-gray-600">{food.subLocation}</p>
+        </div>
+      )}
       
       <div className="flex items-center">
         <Clock className="h-4 w-4 mr-2 text-gray-600" />

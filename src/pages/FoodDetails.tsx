@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -96,7 +95,7 @@ const FoodDetails = () => {
               className="bytewise-btn flex items-center"
             >
               <Info className="h-5 w-5 mr-2" />
-              View Ingredients
+              View Full Ingredients
             </button>
           </div>
           
@@ -104,9 +103,9 @@ const FoodDetails = () => {
           
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bytewise-card">
-              <DollarSign className="h-5 w-5 text-bytewise-blue mb-1" />
-              <p className="text-xs text-gray-600">Price</p>
-              <p className="font-bold">${food.price.toFixed(2)}</p>
+              <MapPin className="h-5 w-5 text-bytewise-blue mb-1" />
+              <p className="text-xs text-gray-600">Location</p>
+              <p className="font-bold">{food.location}</p>
             </div>
             
             <div className="bytewise-card">
@@ -122,13 +121,15 @@ const FoodDetails = () => {
             </div>
           </div>
           
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">Location</h2>
-            <div className="bg-gray-100 p-4 rounded-md">
-              <p className="font-medium">{food.location}</p>
-              <p className="text-sm text-gray-600">Penn State University</p>
+          {food.subLocation && (
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold mb-2">Specific Location</h2>
+              <div className="bg-gray-100 p-4 rounded-md">
+                <p className="font-medium">{food.subLocation}</p>
+                <p className="text-sm text-gray-600">{food.location}</p>
+              </div>
             </div>
-          </div>
+          )}
           
           {food.restrictions.length > 0 && (
             <div className="mb-4">
