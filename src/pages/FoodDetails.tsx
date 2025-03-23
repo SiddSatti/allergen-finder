@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import IngredientsModal from '@/components/IngredientsModal';
 import { FoodItem } from '@/types';
-import { getTestData } from '@/utils/foodRecommendation';
+import { processCSVData } from '@/utils/foodRecommendation';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, DollarSign, Info } from 'lucide-react';
+import { foodCsvData } from '@/data/foodData';
 
 const FoodDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,8 +21,8 @@ const FoodDetails = () => {
       setIsLoading(true);
       
       try {
-        // Use test data as we removed CSV upload functionality
-        const foodItems = getTestData();
+        // Process the embedded CSV data
+        const foodItems = processCSVData(foodCsvData);
         
         // Find the food item with the matching ID
         const foodItem = foodItems.find((item: FoodItem) => item.id === id);

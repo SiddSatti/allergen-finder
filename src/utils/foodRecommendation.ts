@@ -1,6 +1,7 @@
 
 import { FoodItem, CsvData } from '@/types';
 import { parseTimeCategory } from './timeUtils';
+import { foodCsvData } from '@/data/foodData';
 
 // Process CSV data into FoodItem objects
 export const processCSVData = (csvData: CsvData[]): FoodItem[] => {
@@ -99,4 +100,9 @@ export const calculateDistances = (foodItems: FoodItem[], userLat?: number | nul
       distance
     };
   });
+};
+
+// Get test data for food details
+export const getTestData = (): FoodItem[] => {
+  return processCSVData(foodCsvData);
 };

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import DietaryRestrictionTag from '@/components/DietaryRestrictionTag';
-import CsvUploader from '@/components/CsvUploader';
-import { DietaryRestriction, CsvData } from '@/types';
+import { DietaryRestriction } from '@/types';
 import { processCSVData } from '@/utils/foodRecommendation';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
@@ -94,11 +93,6 @@ const DietaryRestrictions = () => {
     }
   };
   
-  const handleCsvUpload = (data: CsvData[]) => {
-    const foodItems = processCSVData(data);
-    localStorage.setItem('foodItems', JSON.stringify(foodItems));
-  };
-  
   const handleContinue = () => {
     navigate('/food-parameters');
   };
@@ -151,14 +145,6 @@ const DietaryRestrictions = () => {
                 <Plus className="h-5 w-5" />
               </button>
             </div>
-          </div>
-          
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-2">Upload Food Data</h3>
-            <p className="text-gray-600 mb-4">
-              Upload a CSV file with food data to get personalized recommendations.
-            </p>
-            <CsvUploader onUpload={handleCsvUpload} />
           </div>
           
           <div className="flex justify-end">
