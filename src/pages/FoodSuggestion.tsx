@@ -8,11 +8,12 @@ import NoSuggestionsFound from '@/components/NoSuggestionsFound';
 import FoodSuggestionCard from '@/components/FoodSuggestionCard';
 import FeedbackButtons from '@/components/FeedbackButtons';
 import { FoodItem, FoodParameters, DietaryRestriction, ModelState } from '@/types';
-import { recommendFoods, getTestData } from '@/utils/foodRecommendation';
+import { recommendFoods, processCSVData } from '@/utils/foodRecommendation';
 import { getCurrentTimeCategory } from '@/utils/timeUtils';
 import useUserLocation from '@/hooks/useUserLocation';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { foodCsvData } from '@/data/foodData';
 
 const FoodSuggestion = () => {
   const navigate = useNavigate();
@@ -26,8 +27,8 @@ const FoodSuggestion = () => {
     setIsLoading(true);
     
     try {
-      // Use test data since we're removing the CSV uploader
-      const foodItems = getTestData();
+      // Process the embedded CSV data
+      const foodItems = processCSVData(foodCsvData);
       
       // Get parameters from local storage
       const params = JSON.parse(localStorage.getItem('foodParameters') || '{}');

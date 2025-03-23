@@ -38,8 +38,8 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
         </div>
         
         <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">Wait time:</p>
-          <p className="font-bold">{food.waitTime} min</p>
+          <p className="text-sm font-medium text-gray-700">Price:</p>
+          <p className="font-bold">${parseFloat(food.price?.toString() || '0').toFixed(2)}</p>
         </div>
       </div>
       
