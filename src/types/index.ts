@@ -42,6 +42,7 @@ export interface CsvData {
   Full_Ingredients: string;
   Embedding: string;
   Price: string | number;
+  [key: string]: string | number | undefined; // Allow for additional properties with string keys
 }
 
 export interface ModelChoice {
