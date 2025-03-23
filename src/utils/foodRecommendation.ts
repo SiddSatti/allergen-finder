@@ -51,10 +51,17 @@ export const processCSVData = (csvData: CsvData[]): FoodItem[] => {
     // Parse time category
     const timeCategory = parseTimeCategory(item.Time);
     
+    // Parse longitude and latitude
+    const longitude = typeof item.Longitude === 'string' ? parseFloat(item.Longitude) : item.Longitude;
+    const latitude = typeof item.Latitude === 'string' ? parseFloat(item.Latitude) : item.Latitude;
+    
+    // Parse price
+    const price = typeof item.Price === 'string' ? parseFloat(item.Price || '0') : (item.Price || 0);
+    
     return {
       id: index.toString(), // Generate an ID since it's not in the CSV
       name: item.Name,
-      price: parseFloat(item.Price || '0'),
+      price,
       distance: 0, // This will be calculated based on coordinates
       waitTime: parseInt(item.Time.match(/\d+/)?.[0] || '0'), // Extract number from time string
       ingredients,
@@ -62,8 +69,8 @@ export const processCSVData = (csvData: CsvData[]): FoodItem[] => {
       subLocation: item.Sub_Location,
       restrictions,
       embedding,
-      longitude: item.Longitude ? parseFloat(item.Longitude) : undefined,
-      latitude: item.Latitude ? parseFloat(item.Latitude) : undefined,
+      longitude,
+      latitude,
       timeCategory,
       skipped: false,
       disliked: false

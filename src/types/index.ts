@@ -36,12 +36,12 @@ export interface CsvData {
   Location: string;
   Sub_Location: string;
   Time: string;
-  Longitude: string;
-  Latitude: string;
+  Longitude: string | number;
+  Latitude: string | number;
   Allergens: string;
   Full_Ingredients: string;
   Embedding: string;
-  Price: string;
+  Price: string | number;
 }
 
 export interface ModelChoice {
