@@ -6,7 +6,7 @@ import IngredientsModal from '@/components/IngredientsModal';
 import { FoodItem } from '@/types';
 import { processCSVData } from '@/utils/foodRecommendation';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, DollarSign, Info } from 'lucide-react';
+import { MapPin, DollarSign, Info, Home } from 'lucide-react';
 import { foodCsvData } from '@/data/foodData';
 
 const FoodDetails = () => {
@@ -103,7 +103,7 @@ const FoodDetails = () => {
           
           <h1 className="text-2xl font-bold mb-3">{food.name}</h1>
           
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bytewise-card">
               <MapPin className="h-5 w-5 text-bytewise-blue mb-1" />
               <p className="text-xs text-gray-600">Location</p>
@@ -114,12 +114,6 @@ const FoodDetails = () => {
               <MapPin className="h-5 w-5 text-bytewise-blue mb-1" />
               <p className="text-xs text-gray-600">Distance</p>
               <p className="font-bold">{food.distance.toFixed(1)} miles</p>
-            </div>
-            
-            <div className="bytewise-card">
-              <Clock className="h-5 w-5 text-bytewise-blue mb-1" />
-              <p className="text-xs text-gray-600">Wait Time</p>
-              <p className="font-bold">{food.waitTime} min</p>
             </div>
           </div>
           
@@ -148,6 +142,16 @@ const FoodDetails = () => {
               </div>
             </div>
           )}
+          
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <button 
+              onClick={() => navigate('/')}
+              className="bytewise-btn w-full flex items-center justify-center"
+            >
+              <Home className="h-5 w-5 mr-2" />
+              Go Home
+            </button>
+          </div>
         </div>
       </motion.div>
       

@@ -32,14 +32,9 @@ const FoodSuggestionCard: React.FC<FoodSuggestionCardProps> = ({
           <p className="font-bold">{food.location}</p>
         </div>
         
-        <div className="text-center">
+        <div className="text-right">
           <p className="text-sm font-medium text-gray-700">Distance:</p>
           <p className="font-bold">{food.distance.toFixed(1)} miles</p>
-        </div>
-        
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">Price:</p>
-          <p className="font-bold">${parseFloat(food.price?.toString() || '0').toFixed(2)}</p>
         </div>
       </div>
       
