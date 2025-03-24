@@ -172,43 +172,55 @@ const FoodSuggestion = () => {
   
   const updateModelWithFeedback = (choice: 0 | 1 | 2) => {
     if (!currentSuggestion || !recommendationModel) return;
-    
+
     const embedding = currentSuggestion.embedding || Array(100).fill(0);
     const model = { ...recommendationModel };
-    
+
+    // Store the original vector for calculating its magnitude
+    const originalIdeal = [...model.ideal];
+
     // Update the ideal vector based on user feedback
     if (choice === 0) { // Dislike
-      // Move away from this food's embedding
-      model.ideal = model.ideal.map((val: number, idx: number) => {
-        if (idx < embedding.length) {
-          return val - (embedding[idx] * 0.1);
-        }
-        return val;
-      });
+        // Move away from this food's embedding
+        model.ideal = model.ideal.map((val: number, idx: number) => {
+            if (idx < embedding.length) {
+                return val - (embedding[idx]);
+            }
+            return val;
+        });
     } else if (choice === 2) { // Like
-      // Move toward this food's embedding
-      model.ideal = model.ideal.map((val: number, idx: number) => {
-        if (idx < embedding.length) {
-          return val + (embedding[idx] * 0.1);
-        }
-        return val;
-      });
+        // Move toward this food's embedding
+        model.ideal = model.ideal.map((val: number, idx: number) => {
+            if (idx < embedding.length) {
+                return val + (embedding[idx]);
+            }
+            return val;
+        });
     }
-    
-    // Normalize the ideal vector periodically to prevent drift
+
+    // Mean center the vector
     const sum = model.ideal.reduce((acc: number, val: number) => acc + val, 0);
     const avg = sum / model.ideal.length;
     model.ideal = model.ideal.map((val: number) => val - avg);
-    
-    // Update model state
+
+    // Restore the original magnitude
+    const centeredMagnitude = Math.sqrt(model.ideal.reduce((sum, val) => sum + val * val, 0));
+    const originalMagnitude = Math.sqrt(originalIdeal.reduce((sum, val) => sum + val * val, 0));
+
+    if (centeredMagnitude !== 0) {
+        const scalingFactor = originalMagnitude / centeredMagnitude;
+        model.ideal = model.ideal.map(val => val * scalingFactor);
+    }
+   // Update model state
     setRecommendationModel(model);
-    
+
     // Save to localStorage
     localStorage.setItem('modelState', JSON.stringify({
-      model,
-      seenItems: Array.from(seenItems)
+        model,
+        seenItems: Array.from(seenItems)
     }));
-  };
+};
+
   
   const handleLike = () => {
     // User likes this food
