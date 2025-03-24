@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -37,18 +36,43 @@ const FoodSuggestion = () => {
       const savedRestrictions = JSON.parse(localStorage.getItem('dietaryRestrictions') || '[]');
       const selectedRestrictions = savedRestrictions
         .filter((restriction: DietaryRestriction) => restriction.selected)
-        .map((restriction: DietaryRestriction) => restriction.name);
+        .map((restriction: DietaryRestriction) => restriction.name.toLowerCase());
       
       // Get parameters from local storage (for max distance)
       const params = JSON.parse(localStorage.getItem('foodParameters') || '{}');
       const maxDistance = params.distance || Infinity;
       
-      // Filter by dietary restrictions
+      // Get current time category
+      const currentTimeCategory = getCurrentTimeCategory();
+      
+      // Filter by dietary restrictions and time
       let filteredItems = foodItems.filter(food => {
-        // Check if the item contains any of the user's restrictions
-        return !food.restrictions.some(restriction => 
-          selectedRestrictions.includes(restriction)
-        );
+        // Check if the food is available at the current time
+        if (food.timeCategory && food.timeCategory !== 'Other') {
+          if (food.timeCategory !== currentTimeCategory) {
+            return false;
+          }
+        }
+        
+        // Check standard allergies
+        for (const restriction of selectedRestrictions) {
+          // First check if the food contains any allergens listed in the restrictions array
+          if (food.restrictions.some(allergen => 
+            allergen.toLowerCase() === restriction.toLowerCase()
+          )) {
+            return false;
+          }
+          
+          // For custom allergies, also check the full ingredients text
+          if (food.ingredients && food.ingredients.length > 0) {
+            const ingredientsText = food.ingredients.join(' ').toLowerCase();
+            if (ingredientsText.includes(restriction.toLowerCase())) {
+              return false;
+            }
+          }
+        }
+        
+        return true;
       });
       
       // Calculate distances if we have user location
@@ -257,7 +281,7 @@ const FoodSuggestion = () => {
   return (
     <div className="bytewise-container bytewise-page-transition">
       <Header 
-        title={currentSuggestion.name} 
+        title={currentSuggestion?.name || 'Food Suggestion'} 
         showBackButton={true} 
       />
       
@@ -267,23 +291,27 @@ const FoodSuggestion = () => {
         transition={{ duration: 0.5 }}
         className="p-6"
       >
-        <FoodSuggestionCard 
-          food={currentSuggestion}
-          onViewIngredients={() => setIsIngredientsOpen(true)}
-        />
-        
-        <FeedbackButtons 
-          onLike={handleLike}
-          onDislike={handleDislike}
-          onShuffle={handleShuffle}
-        />
+        {currentSuggestion && (
+          <>
+            <FoodSuggestionCard 
+              food={currentSuggestion}
+              onViewIngredients={() => setIsIngredientsOpen(true)}
+            />
+            
+            <FeedbackButtons 
+              onLike={handleLike}
+              onDislike={handleDislike}
+              onShuffle={handleShuffle}
+            />
+          </>
+        )}
       </motion.div>
       
       <IngredientsModal
         isOpen={isIngredientsOpen}
         onClose={() => setIsIngredientsOpen(false)}
-        ingredients={currentSuggestion.ingredients}
-        foodName={currentSuggestion.name}
+        ingredients={currentSuggestion?.ingredients || []}
+        foodName={currentSuggestion?.name || ''}
       />
     </div>
   );

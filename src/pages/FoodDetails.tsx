@@ -1,88 +1,71 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-import IngredientsModal from '@/components/IngredientsModal';
 import { FoodItem } from '@/types';
-import { processCSVData } from '@/utils/foodRecommendation';
+import { getTestData } from '@/utils/foodRecommendation';
+import { MapPin, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { MapPin, DollarSign, Info, Home } from 'lucide-react';
-import { foodCsvData } from '@/data/foodData';
 
 const FoodDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [food, setFood] = useState<FoodItem | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
-  
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const loadFoodDetails = () => {
-      setIsLoading(true);
-      
+    const fetchFood = async () => {
+      setLoading(true);
       try {
-        // Process the embedded CSV data
-        const foodItems = processCSVData(foodCsvData);
-        
-        // Find the food item with the matching ID
-        const foodItem = foodItems.find((item: FoodItem) => item.id === id);
+        // Fetch the food by ID
+        const data = getTestData();
+        const foodItem = data.find(item => item.id === id);
         
         if (foodItem) {
           setFood(foodItem);
         } else {
-          console.error('Food item not found:', id);
+          console.error('Food item not found');
         }
       } catch (error) {
-        console.error('Error loading food details:', error);
+        console.error('Error fetching food details:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    loadFoodDetails();
+
+    fetchFood();
   }, [id]);
-  
-  if (isLoading) {
+
+  if (loading) {
     return (
-      <div className="bytewise-container">
-        <Header title="Loading..." showBackButton={true} />
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-pulse mb-4">
-              <div className="h-16 w-16 bg-bytewise-blue rounded-full mx-auto"></div>
-            </div>
-            <p className="text-lg text-gray-600">Loading food details...</p>
-          </div>
+      <div className="bytewise-container bytewise-page-transition flex items-center justify-center">
+        <div className="text-center">
+          <div className="bytewise-loading-spinner mb-4"></div>
+          <p className="text-gray-600">Loading food details...</p>
         </div>
       </div>
     );
   }
-  
+
   if (!food) {
     return (
-      <div className="bytewise-container">
+      <div className="bytewise-container bytewise-page-transition p-6">
         <Header title="Not Found" showBackButton={true} />
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="text-center">
-            <p className="text-lg mb-4">Food item not found.</p>
-            <button 
-              onClick={() => navigate('/food-suggestion')}
-              className="bytewise-btn"
-            >
-              Back to Suggestions
-            </button>
-          </div>
+        <div className="text-center mt-10">
+          <h2 className="text-xl font-bold">Food item not found</h2>
+          <p className="text-gray-600 mt-2">The food item you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/')} className="mt-6">
+            Go Home
+          </Button>
         </div>
       </div>
     );
   }
-  
+
   return (
     <div className="bytewise-container bytewise-page-transition">
-      <Header 
-        title={food.name} 
-        showBackButton={true} 
-      />
+      <Header title={food.name} showBackButton={true} />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -91,76 +74,71 @@ const FoodDetails = () => {
         className="p-6"
       >
         <div className="bytewise-card mb-6">
-          <div className="relative bg-gray-200 h-56 rounded-md mb-4 flex items-center justify-center">
-            <button 
-              onClick={() => setIsIngredientsOpen(true)}
-              className="bytewise-btn flex items-center"
-            >
-              <Info className="h-5 w-5 mr-2" />
-              View Full Ingredients
-            </button>
+          <div className="bg-gray-200 h-48 rounded-md mb-4 flex items-center justify-center">
+            {/* Placeholder for food image */}
+            <p className="text-gray-500">Food Image</p>
           </div>
           
-          <h1 className="text-2xl font-bold mb-3">{food.name}</h1>
-          
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bytewise-card">
-              <MapPin className="h-5 w-5 text-bytewise-blue mb-1" />
-              <p className="text-xs text-gray-600">Location</p>
+          <div className="flex justify-between mb-4">
+            <div className="text-left">
+              <p className="text-sm font-medium text-gray-700">Location:</p>
               <p className="font-bold">{food.location}</p>
             </div>
             
-            <div className="bytewise-card">
-              <MapPin className="h-5 w-5 text-bytewise-blue mb-1" />
-              <p className="text-xs text-gray-600">Distance</p>
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-700">Distance:</p>
               <p className="font-bold">{food.distance.toFixed(1)} miles</p>
             </div>
           </div>
           
           {food.subLocation && (
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold mb-2">Specific Location</h2>
-              <div className="bg-gray-100 p-4 rounded-md">
-                <p className="font-medium">{food.subLocation}</p>
-                <p className="text-sm text-gray-600">{food.location}</p>
-              </div>
+            <div className="flex items-center mb-3">
+              <MapPin className="h-4 w-4 mr-2 text-gray-600" />
+              <p className="text-sm text-gray-600">{food.subLocation}</p>
             </div>
           )}
-          
-          {food.restrictions.length > 0 && (
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold mb-2">Dietary Notes</h2>
-              <div className="flex flex-wrap gap-2">
-                {food.restrictions.map((restriction, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded"
-                  >
-                    Contains {restriction}
-                  </span>
+        </div>
+        
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Ingredients</h3>
+          <div className="bg-gray-100 p-4 rounded-md">
+            {food.ingredients && food.ingredients.length > 0 ? (
+              <ul className="list-disc list-inside text-gray-700">
+                {food.ingredients.map((ingredient, index) => (
+                  <li key={index}>{ingredient}</li>
                 ))}
-              </div>
-            </div>
-          )}
-          
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <button 
-              onClick={() => navigate('/')}
-              className="bytewise-btn w-full flex items-center justify-center"
-            >
-              <Home className="h-5 w-5 mr-2" />
-              Go Home
-            </button>
+              </ul>
+            ) : (
+              <p className="text-gray-500">No ingredients information available.</p>
+            )}
           </div>
         </div>
+        
+        {food.restrictions && food.restrictions.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Allergens</h3>
+            <div className="flex flex-wrap gap-2">
+              {food.restrictions.map((restriction, index) => (
+                <span 
+                  key={index} 
+                  className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                >
+                  {restriction}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <Button 
+          onClick={() => navigate('/')} 
+          className="w-full mt-6"
+          variant="default"
+        >
+          <Home className="h-4 w-4 mr-2" />
+          Go Home
+        </Button>
       </motion.div>
-      
-      <IngredientsModal
-        isOpen={isIngredientsOpen}
-        onClose={() => setIsIngredientsOpen(false)}
-        ingredients={food.ingredients}
-        foodName={food.name}
-      />
     </div>
   );
 };
